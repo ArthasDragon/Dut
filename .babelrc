@@ -1,0 +1,21 @@
+{
+  "presets": [
+    [
+      "es2015",
+      {
+        "modules": false
+      }
+    ],
+    "react"
+  ],
+  "plugins": [
+    "transform-runtime",
+    [
+      "transform-react-jsx",
+      {
+        "pragma": "React.createElement" // 默认 pragma 为 React.createElement
+      }
+    ],
+    "transform-es2015-modules-commonjs"
+  ]
+}
