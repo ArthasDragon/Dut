@@ -1,0 +1,9 @@
+{
+  "name": "Dut",
+  "version": "1.0.0",
+  "description": "learn react from luy",
+  "main": "index.js",
+  "repository": "git@github.com:ArthasDragon/Dut.git",
+  "author": "Dragon <1641627793@qq.com>",
+  "license": "MIT"
+}
