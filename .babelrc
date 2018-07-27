@@ -15,7 +15,6 @@
       {
         "pragma": "React.createElement" // 默认 pragma 为 React.createElement
       }
-    ],
-    "transform-es2015-modules-commonjs"
+    ]
   ]
 }
