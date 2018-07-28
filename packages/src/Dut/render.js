@@ -16,20 +16,31 @@ function mapProps(domNode, props) {
 }
 
 function render(Vnode, container) {
+	if (!Vnode) return;
+
 	const { type, props } = Vnode;
 
 	if (!type) return;
-	let domNode;
+
+	const { children } = props;
 
 	//初始化react dom树节点
-	domNode = document.createElement(type);
+	let domNode = document.createElement(type);
 
 	//将props处理后加入domNode中
 	mapProps(domNode, props);
 
+	//将children挂载到domNode上
+	mountChildren(children, domNode);
+
 	//将处理后domNode加入html中
 	container.appendChild(domNode);
 }
+
+function mountChildren(children, domNode) {
+	render(children, domNode);
+}
+
 export const ReactDOM = {
 	render
 };

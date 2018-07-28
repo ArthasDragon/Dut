@@ -1,16 +1,19 @@
-import React, { ReactDOM } from "react";
-console.log(
-	<div className="fuck you jsx">
-		dfdfdf
-		<span />
-	</div>
-);
+import React, { ReactDOM, Component } from "react";
+
+class Test extends Component {
+	render() {
+		return <div>haha</div>;
+	}
+}
+
+console.log(<Test />);
+
 ReactDOM.render(
 	<div
 		style={{ background: "#eee", width: "100px", height: "100px" }}
 		className="fuck"
 	>
-		hahaha
+		<div style={{ width: "10px", height: "10px", background: "red" }} />
 	</div>,
 	document.getElementById("root")
 );

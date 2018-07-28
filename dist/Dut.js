@@ -58,18 +58,68 @@ function mapProps(domNode, props) {
 	}
 }
 function render(Vnode, container) {
+	if (!Vnode) return;
 	var type = Vnode.type,
 		props = Vnode.props;
 	if (!type) return;
-	var domNode = void 0;
-	domNode = document.createElement(type);
+	var children = props.children;
+	var domNode = document.createElement(type);
 	mapProps(domNode, props);
+	mountChildren(children, domNode);
 	container.appendChild(domNode);
+}
+function mountChildren(children, domNode) {
+	render(children, domNode);
 }
 var ReactDOM = {
 	render: render
 };
 
-var React = { createElement: createElement, ReactDOM: ReactDOM };
+var _createClass = (function() {
+	function defineProperties(target, props) {
+		for (var i = 0; i < props.length; i++) {
+			var descriptor = props[i];
+			descriptor.enumerable = descriptor.enumerable || false;
+			descriptor.configurable = true;
+			if ("value" in descriptor) descriptor.writable = true;
+			Object.defineProperty(target, descriptor.key, descriptor);
+		}
+	}
+	return function(Constructor, protoProps, staticProps) {
+		if (protoProps) defineProperties(Constructor.prototype, protoProps);
+		if (staticProps) defineProperties(Constructor, staticProps);
+		return Constructor;
+	};
+})();
+function _classCallCheck$1(instance, Constructor) {
+	if (!(instance instanceof Constructor)) {
+		throw new TypeError("Cannot call a class as a function");
+	}
+}
+var Component = (function() {
+	function Component(props) {
+		_classCallCheck$1(this, Component);
+		this.props = props;
+		this.state = this.state || {};
+		this.nextState = null;
+	}
+	_createClass(Component, [
+		{
+			key: "setState",
+			value: function setState(nState) {}
+		},
+		{
+			key: "render",
+			value: function render() {}
+		}
+	]);
+	return Component;
+})();
+
+var React = {
+	createElement: createElement,
+	ReactDOM: ReactDOM,
+	Component: Component
+};
 
 module.exports = React;
