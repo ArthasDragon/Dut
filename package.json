@@ -9,15 +9,10 @@
   "scripts": {
     "build": "rollup -c ./scripts/build/rollup.js",
     "start": "node scripts/start.js",
-    "precommit": "lint-staged",
     "format": "prettier-eslint --write \"**/*.js\""
   },
   "lint-staged": {
-    "*.js": [
-      "prettier-eslint --write",
-      "eslint",
-      "git add"
-    ]
+    
   },
   "keywords": [
     "react-like"
