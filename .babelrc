@@ -6,15 +6,8 @@
         "modules": false
       }
     ],
+    "stage-2",
     "react"
   ],
-  "plugins": [
-    "transform-runtime",
-    [
-      "transform-react-jsx",
-      {
-        "pragma": "React.createElement" // 默认 pragma 为 React.createElement
-      }
-    ]
-  ]
+  "plugins": []
 }

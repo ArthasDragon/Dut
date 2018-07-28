@@ -7,7 +7,17 @@
   "author": "Dragon <1641627793@qq.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rollup -c ./scripts/build/rollup.js"
+    "build": "rollup -c ./scripts/build/rollup.js",
+    "start": "node scripts/start.js",
+    "precommit": "lint-staged",
+    "format": "prettier-eslint --write \"**/*.js\""
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier-eslint --write",
+      "eslint",
+      "git add"
+    ]
   },
   "keywords": [
     "react-like"
@@ -15,12 +25,19 @@
   "devDependencies": {
     "babel": "^6.23.0",
     "babel-loader": "^7.1.5",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "css-loader": "^1.0.0",
+    "eslint": "^4.19.1",
     "happypack": "^5.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "^0.14.3",
+    "less-loader": "^4.1.0",
     "open-browser-webpack-plugin": "^0.0.5",
+    "postcss-loader": "^2.1.6",
+    "prettier": "^1.13.7",
+    "prettier-eslint-cli": "^4.7.1",
     "react-hot-loader": "^4.3.4",
     "rollup": "^0.63.4",
     "rollup-plugin-babel": "^2.7.1",
@@ -32,6 +49,7 @@
     "webpack-dev-server": "^3.1.5"
   },
   "dependencies": {
+    "eslint-cli": "^1.1.1",
     "whatwg-fetch": "^2.0.4"
   }
 }
