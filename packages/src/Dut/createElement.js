@@ -33,6 +33,16 @@ function createElement(type, config, ...children) {
 	//children放到props中
 	props.children = childLength === 1 ? children[0] : children;
 
+	//defaultProps
+	let defaultProps = type.defaultProps;
+	if (defaultProps) {
+		for (let propName in defaultProps) {
+			if (props[propName === undefined]) {
+				props[propName] = defaultProps[propName];
+			}
+		}
+	}
+
 	return new Vnode(type, props, key, ref);
 }
 export default createElement;
