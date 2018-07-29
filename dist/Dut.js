@@ -1,5 +1,5 @@
 /**
- * by 暗影舞者 Copyright 2018-07-28
+ * by 暗影舞者 Copyright 2018-07-29
  */
 
 function _classCallCheck(instance, Constructor) {
@@ -41,7 +41,20 @@ function createElement(type, config) {
 	return new Vnode(type, props, key, ref);
 }
 
-function mapProps(domNode, props) {
+var _typeof =
+	typeof Symbol === "function" && typeof Symbol.iterator === "symbol"
+		? function(obj) {
+			return typeof obj;
+		  }
+		: function(obj) {
+			return obj &&
+					typeof Symbol === "function" &&
+					obj.constructor === Symbol &&
+					obj !== Symbol.prototype
+				? "symbol"
+				: typeof obj;
+		  };
+var mapProps = function mapProps(domNode, props) {
 	for (var propsName in props) {
 		if (propsName === "children") continue;
 		if (propsName === "style") {
@@ -56,25 +69,61 @@ function mapProps(domNode, props) {
 		}
 		domNode[propsName] = props[propsName];
 	}
-}
+};
 function render(Vnode, container) {
 	if (!Vnode) return;
 	var type = Vnode.type,
 		props = Vnode.props;
 	if (!type) return;
 	var children = props.children;
-	var domNode = document.createElement(type);
+	var domNode = void 0;
+	var VnodeType = typeof type === "undefined" ? "undefined" : _typeof(type);
+	if (VnodeType === "function") {
+		domNode = renderComponent(Vnode, container);
+	}
+	if (VnodeType === "string") {
+		domNode = document.createElement(type);
+	}
 	mapProps(domNode, props);
 	mountChildren(children, domNode);
+	Vnode._hostNode = domNode;
 	container.appendChild(domNode);
+	return domNode;
 }
-function mountChildren(children, domNode) {
-	render(children, domNode);
+function mountChildren(children, parentNode) {
+	if (children.length > 1) {
+		children.forEach(function(child) {
+			return render(child, parentNode);
+		});
+	} else {
+		render(children, parentNode);
+	}
+}
+function renderComponent(Vnode, container) {
+	var ComponentClass = Vnode.type;
+	var props = Vnode.props;
+	var instance = new ComponentClass(props);
+	var renderVnode = instance.render();
+	instance.Vnode = renderVnode;
+	return render(renderVnode, container);
 }
 var ReactDOM = {
 	render: render
 };
 
+var _extends =
+	Object.assign ||
+	function(target) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
+				if (Object.prototype.hasOwnProperty.call(source, key)) {
+					target[key] = source[key];
+				}
+			}
+		}
+		return target;
+	};
 var _createClass = (function() {
 	function defineProperties(target, props) {
 		for (var i = 0; i < props.length; i++) {
@@ -106,7 +155,22 @@ var Component = (function() {
 	_createClass(Component, [
 		{
 			key: "setState",
-			value: function setState(nState) {}
+			value: function setState(nState) {
+				var preState = this.state;
+				this.nextState = _extends({}, preState, nState);
+				this.state = this.nextState;
+				var oldVnode = this.Vnode;
+				var newVnode = this.render();
+				this.updateComponent(this, oldVnode, newVnode);
+			}
+		},
+		{
+			key: "updateComponent",
+			value: function updateComponent(instance, oldVnode, newVnode) {
+				if (oldVnode.type === newVnode.type) {
+					mapProps(oldVnode._hostNode, newVnode.props);
+				}
+			}
 		},
 		{
 			key: "render",
