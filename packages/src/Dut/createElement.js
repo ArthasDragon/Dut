@@ -7,6 +7,13 @@ class Vnode {
 	}
 }
 
+const IGNORE_PROPS = {
+	ref: true,
+	key: true,
+	__self: true,
+	__source: true
+};
+
 /**
  *
  * @param {String,Function} type
@@ -25,6 +32,12 @@ function createElement(type, config, ...children) {
 
 		for (let name in config) {
 			if (name !== "key" && name !== "ref") {
+				//过滤一些不需要的props
+				if (IGNORE_PROPS.hasOwnProperty(name)) {
+					continue;
+				}
+
+				//确保不是undefined
 				config.hasOwnProperty(name) && (props[name] = config[name]);
 			}
 		}

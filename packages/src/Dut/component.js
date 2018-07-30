@@ -10,10 +10,10 @@ export default class Component {
 
 	setState(nState) {
 		const preState = this.state; //保存更新之前的state
+		const oldVnode = this.Vnode; //更新前的Vnode   用于diff
+
 		this.nextState = { ...preState, ...nState }; //更新后的state
 		this.state = this.nextState;
-
-		const oldVnode = this.Vnode; //更新前的Vnode   用于diff
 		const newVnode = this.render(); //state改变后的Vnode
 
 		this.updateComponent(this, oldVnode, newVnode);
