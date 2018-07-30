@@ -1,5 +1,17 @@
 import { mapProps } from "./render";
 
+//组件状态
+export const ComStatue = {
+	CREATE: 0, //创造节点
+	MOUNT: 1, //节点已经挂载
+	UPDATING: 2, //节点正在更新
+	UPDATED: 3, //节点已经更新
+	MOUNTTING: 4 //节点正在挂载,
+	//   CATCHING: 5
+};
+
+let uniqueId = 0; //组件的id  不重复
+
 export default class Component {
 	constructor(props) {
 		this.props = props;
