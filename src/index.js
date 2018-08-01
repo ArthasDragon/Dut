@@ -53,4 +53,8 @@ ReactDOM.render(
 	</div>,
 	document.getElementById("root")
 );
-console.log(2322232332332);
+console.log(
+	<div>
+		<input type="text" value="232323" />
+	</div>
+);

@@ -1,4 +1,4 @@
-import { mapProps } from "./render";
+import { mapProps } from "./mapProps";
 
 //组件状态
 export const ComStatue = {
@@ -18,6 +18,9 @@ export default class Component {
 		this.state = this.state || {};
 
 		this.nextState = null; //用于更新
+		this.lifeCycle = ComStatue.CREATE; //组件生命周期
+		this.refs = {}; //组件对应dom节点
+		this._uniqueId = uniqueId++; //组件唯一id
 	}
 
 	setState(nState) {

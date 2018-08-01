@@ -1,5 +1,5 @@
 /**
- * by 暗影舞者 Copyright 2018-07-29
+ * by 暗影舞者 Copyright 2018-08-01
  */
 
 function _classCallCheck(instance, Constructor) {
@@ -13,6 +13,12 @@ var Vnode = function Vnode(type, props, key, ref) {
 	this.props = props;
 	this.key = key;
 	this.ref = ref;
+};
+var IGNORE_PROPS = {
+	ref: true,
+	key: true,
+	__self: true,
+	__source: true
 };
 function createElement(type, config) {
 	for (
@@ -33,28 +39,29 @@ function createElement(type, config) {
 		ref = config.ref === undefined ? null : config.ref;
 		for (var name in config) {
 			if (name !== "key" && name !== "ref") {
+				if (IGNORE_PROPS.hasOwnProperty(name)) {
+					continue;
+				}
 				config.hasOwnProperty(name) && (props[name] = config[name]);
 			}
 		}
 	}
 	props.children = childLength === 1 ? children[0] : children;
+	var defaultProps = type.defaultProps;
+	if (defaultProps) {
+		for (var propName in defaultProps) {
+			if (props[propName === undefined]) {
+				props[propName] = defaultProps[propName];
+			}
+		}
+	}
 	return new Vnode(type, props, key, ref);
 }
 
-var _typeof =
-	typeof Symbol === "function" && typeof Symbol.iterator === "symbol"
-		? function(obj) {
-			return typeof obj;
-		  }
-		: function(obj) {
-			return obj &&
-					typeof Symbol === "function" &&
-					obj.constructor === Symbol &&
-					obj !== Symbol.prototype
-				? "symbol"
-				: typeof obj;
-		  };
-var mapProps = function mapProps(domNode, props) {
+var mapProps = function mapProps(domNode, props, Vnode) {
+	if (Vnode && typeof Vnode.type === "function") {
+		return;
+	}
 	for (var propsName in props) {
 		if (propsName === "children") continue;
 		if (propsName === "style") {
@@ -70,6 +77,20 @@ var mapProps = function mapProps(domNode, props) {
 		domNode[propsName] = props[propsName];
 	}
 };
+
+var _typeof =
+	typeof Symbol === "function" && typeof Symbol.iterator === "symbol"
+		? function(obj) {
+			return typeof obj;
+		  }
+		: function(obj) {
+			return obj &&
+					typeof Symbol === "function" &&
+					obj.constructor === Symbol &&
+					obj !== Symbol.prototype
+				? "symbol"
+				: typeof obj;
+		  };
 function render(Vnode, container) {
 	if (!Vnode) return;
 	var type = Vnode.type,
@@ -145,21 +166,32 @@ function _classCallCheck$1(instance, Constructor) {
 		throw new TypeError("Cannot call a class as a function");
 	}
 }
+var ComStatue = {
+	CREATE: 0,
+	MOUNT: 1,
+	UPDATING: 2,
+	UPDATED: 3,
+	MOUNTTING: 4
+};
+var uniqueId = 0;
 var Component = (function() {
 	function Component(props) {
 		_classCallCheck$1(this, Component);
 		this.props = props;
 		this.state = this.state || {};
 		this.nextState = null;
+		this.lifeCycle = ComStatue.CREATE;
+		this.refs = {};
+		this._uniqueId = uniqueId++;
 	}
 	_createClass(Component, [
 		{
 			key: "setState",
 			value: function setState(nState) {
 				var preState = this.state;
+				var oldVnode = this.Vnode;
 				this.nextState = _extends({}, preState, nState);
 				this.state = this.nextState;
-				var oldVnode = this.Vnode;
 				var newVnode = this.render();
 				this.updateComponent(this, oldVnode, newVnode);
 			}

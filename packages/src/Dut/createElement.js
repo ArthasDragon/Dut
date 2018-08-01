@@ -7,7 +7,7 @@ class Vnode {
 	}
 }
 
-const IGNORE_PROPS = {
+const RESERVED_PROPS = {
 	ref: true,
 	key: true,
 	__self: true,
@@ -33,7 +33,7 @@ function createElement(type, config, ...children) {
 		for (let name in config) {
 			if (name !== "key" && name !== "ref") {
 				//过滤一些不需要的props
-				if (IGNORE_PROPS.hasOwnProperty(name)) {
+				if (RESERVED_PROPS.hasOwnProperty(name)) {
 					continue;
 				}
 
