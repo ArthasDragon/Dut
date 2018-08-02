@@ -1,4 +1,4 @@
-import createElement from "./createElement";
+import { createElement } from "./createElement";
 import { ReactDOM } from "./render";
 import Component from "./component";
 

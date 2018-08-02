@@ -1,6 +1,6 @@
 let __type = Object.prototype.toString;
 
-var numberMap = {
+let numberMap = {
 	//null undefined IE6-8这里会返回[object Object]
 	"[object Boolean]": 2,
 	"[object Number]": 3,
@@ -38,7 +38,7 @@ export function typeNumber(data) {
 	if (data === undefined) {
 		return 0;
 	}
-	var a = numberMap[__type.call(data)];
+	let a = numberMap[__type.call(data)];
 	return a || 8;
 }
 

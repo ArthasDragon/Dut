@@ -65,6 +65,7 @@ export function createElement(type, config, ...children) {
 	return new Vnode(type, props, key, ref);
 }
 
+/* 待优化！！！！！！！！！！！！！！ */
 /**
  * 将children中的文本节点转换为Vnode对象
  * @param {Vnode | String | Number} children

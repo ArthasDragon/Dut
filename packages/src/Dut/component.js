@@ -13,14 +13,17 @@ export const ComStatue = {
 let uniqueId = 0; //组件的id  不重复
 
 export default class Component {
-	constructor(props) {
+	constructor(props, context) {
 		this.props = props;
 		this.state = this.state || {};
+		this.context = context;
 
 		this.nextState = null; //用于更新
 		this.lifeCycle = ComStatue.CREATE; //组件生命周期
 		this.refs = {}; //组件对应dom节点
 		this._uniqueId = uniqueId++; //组件唯一id
+		this._penddingState = []; //状态存储   存储每一次setState  更新组件时一起合并触发
+		this.stateMergeQueue = [];
 	}
 
 	setState(nState) {
