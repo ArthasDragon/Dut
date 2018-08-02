@@ -88,6 +88,7 @@ export function flattenChildren(children, parentVnode) {
 
 	//不是数组
 	if (childType !== 7) {
+		// if (parentVnode) children.return = parentVnode
 		return children;
 	}
 

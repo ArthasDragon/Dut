@@ -105,6 +105,33 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 		//string or number
 		renderedVnode = new Vnode("#text", renderedVnode, null, null);
 	}
+	// currentOwner.cur = lastOwner
+
+	if (renderedVnode === void 2333) {
+		return;
+	}
+
+	//renderedVnode  Vnode或者Vnode数组
+	renderedVnode.key = key || null;
+	instance.Vnode = renderedVnode; //Vnode-->_instance-->renderedVnode
+	instance.Vnode._mountIndex = mountIndex++;
+
+	//   Vnode.displayName = Component.name //以下这两行用于componentDidcatch
+	//   instance.Vnode.return = Vnode //必须要在插入前设置return(父Vnode)给所有的Vnode.
+
+	let domNode = null;
+	//   if (renderedType !== 7) {
+	domNode = DuyRender(
+		renderedVnode,
+		parentDomNode,
+		false,
+		instance.context,
+		instance
+	);
+	// renderedVnode.displayName = Component.name;//记录名字
+	//   } else {
+	//     domNode = renderedVnode[0]._hostNode
+	//   }
 
 	//记录实例的renderVnode
 	instance.Vnode = renderedVnode;
