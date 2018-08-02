@@ -1,5 +1,7 @@
 import { mapProps } from "./mapProps";
 import { typeNumber } from "./utils";
+import { catchError } from "./ErrorUtil";
+import { Vnode } from "./createElement";
 
 let mountIndex = 0; //全局变量
 let containerMap = {};
@@ -33,14 +35,12 @@ function render(Vnode, container) {
  * @param {*} Vnode
  * @param {Element} container 要挂载到的dom节点
  * @param {Boolean} isUpdate  是否在更新中   在更新中则不进行挂载操作
- * @param {Boolean} instance  实现refs机制
+ * @param {} instance  实现refs机制
  */
-function DuyRender(Vnode, container, isUpdate, parentContext, instance) {
+function DuyRender(Vnode, container, isUpdate, parentContext = {}, instance) {
 	if (!Vnode) return;
 
-	const { type, props } = Vnode;
-
-	if (!type) return;
+	const { type, props = {} } = Vnode;
 
 	const { children } = props;
 	let domNode;
@@ -48,7 +48,7 @@ function DuyRender(Vnode, container, isUpdate, parentContext, instance) {
 
 	//初始化react dom树节点
 	if (VnodeType === "function") {
-		domNode = renderComponent(Vnode, container);
+		domNode = renderComponent(Vnode, container, parentContext);
 	}
 	if (VnodeType === "string") {
 		domNode = document.createElement(type);
@@ -78,23 +78,39 @@ function mountChildren(children, parentNode) {
 }
 
 //将Component中renderVnode的domNode返回  并将renderVnode记录在Vnode节点下
-function renderComponent(Vnode, container) {
+function renderComponent(Vnode, parentDomNode, parentContext) {
 	const ComponentClass = Vnode.type;
-	const { props } = Vnode;
+	const { props, key, ref } = Vnode;
 
-	//生成子类实例
-	const instance = new ComponentClass(props);
+	const instance = new ComponentClass(props); //生成子类实例
+	Vnode._instance = instance; //记录Vnode对应的实例
 
-	const renderVnode = instance.render();
+	//执行生命周期componentWillMount   出错则返回
+	if (instance.componentWillMount) {
+		const isCatched = catchError(instance, "componentWillMount", [Vnode]);
+		if (isCatched) return;
+	}
+
+	//   let lastOwner = currentOwner.cur //记录上个实例
+	//   currentOwner.cur = instance //存储当前实例
+
+	let renderedVnode = catchError(instance, "render", [Vnode]); //执行render并记录生成的Vnode  有错误则提示
+	const renderedType = typeNumber(renderedVnode);
+
+	if (renderedType === 7) {
+		//数组
+		renderedVnode = mountChildren(renderedVnode, parentDomNode);
+	}
+	if (renderedType === 3 || renderedType === 4) {
+		//string or number
+		renderedVnode = new Vnode("#text", renderedVnode, null, null);
+	}
 
 	//记录实例的renderVnode
-	instance.Vnode = renderVnode;
-
-	//记录Vnode对应的实例
-	Vnode._instance = instance;
+	instance.Vnode = renderedVnode;
 
 	//返回renderVnode对应的domNode
-	return DuyRender(renderVnode, container);
+	return DuyRender(renderedVnode, parentDomNode);
 }
 
 export const ReactDOM = {

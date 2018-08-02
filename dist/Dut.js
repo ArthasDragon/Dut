@@ -2,8 +2,8 @@
  * by 暗影舞者 Copyright 2018-08-02
  */
 
-let __type = Object.prototype.toString;
-let numberMap = {
+var __type = Object.prototype.toString;
+var numberMap = {
 	"[object Boolean]": 2,
 	"[object Number]": 3,
 	"[object String]": 4,
@@ -18,7 +18,7 @@ function typeNumber(data) {
 	if (data === undefined) {
 		return 0;
 	}
-	let a = numberMap[__type.call(data)];
+	var a = numberMap[__type.call(data)];
 	return a || 8;
 }
 
@@ -27,13 +27,13 @@ function _classCallCheck(instance, Constructor) {
 		throw new TypeError("Cannot call a class as a function");
 	}
 }
-let RESERVED_PROPS = {
+var RESERVED_PROPS = {
 	ref: true,
 	key: true,
 	__self: true,
 	__source: true
 };
-let Vnode = function Vnode(type, props, key, ref) {
+var Vnode = function Vnode(type, props, key, ref) {
 	_classCallCheck(this, Vnode);
 	this.type = type;
 	this.props = props;
@@ -50,14 +50,14 @@ function createElement(type, config) {
 	) {
 		children[_key - 2] = arguments[_key];
 	}
-	let props = {},
+	var props = {},
 		key = null,
 		ref = null,
 		childLength = children.length;
 	if (config != null) {
 		key = config.key === undefined ? null : "" + config.key;
 		ref = config.ref === undefined ? null : config.ref;
-		for (let name in config) {
+		for (var name in config) {
 			if (name !== "key" && name !== "ref") {
 				if (RESERVED_PROPS.hasOwnProperty(name)) {
 					continue;
@@ -71,9 +71,9 @@ function createElement(type, config) {
 	} else if (childLength > 1) {
 		props.children = children;
 	}
-	let defaultProps = type.defaultProps;
+	var defaultProps = type.defaultProps;
 	if (defaultProps) {
-		for (let propName in defaultProps) {
+		for (var propName in defaultProps) {
 			if (props[propName === undefined]) {
 				props[propName] = defaultProps[propName];
 			}
@@ -82,15 +82,15 @@ function createElement(type, config) {
 	return new Vnode(type, props, key, ref);
 }
 
-let mapProps = function mapProps(domNode, props, Vnode) {
+var mapProps = function mapProps(domNode, props, Vnode) {
 	if (Vnode && typeof Vnode.type === "function") {
 		return;
 	}
-	for (let propsName in props) {
+	for (var propsName in props) {
 		if (propsName === "children") continue;
 		if (propsName === "style") {
-			let _ret = (function() {
-				let style = props["style"];
+			var _ret = (function() {
+				var style = props["style"];
 				Object.keys(style).forEach(function(styleName) {
 					domNode.style[styleName] = style[styleName];
 				});
@@ -102,7 +102,27 @@ let mapProps = function mapProps(domNode, props, Vnode) {
 	}
 };
 
-let _typeof =
+function catchError(Instance, hookname, args) {
+	try {
+		if (Instance[hookname]) {
+			var result = void 2333;
+			if (hookname === "render") {
+				result = Instance[hookname].apply(Instance);
+			} else {
+				result = Instance[hookname].apply(Instance, args);
+			}
+			return result;
+		}
+	} catch (e) {
+		var Vnode = void 0;
+		Vnode = Instance.Vnode;
+		if (hookname === "render" || hookname === "componentWillMount") {
+			Vnode = args[0];
+		}
+	}
+}
+
+var _typeof =
 	typeof Symbol === "function" && typeof Symbol.iterator === "symbol"
 		? function(obj) {
 			return typeof obj;
@@ -115,31 +135,34 @@ let _typeof =
 				? "symbol"
 				: typeof obj;
 		  };
-let mountIndex = 0;
-let containerMap = {};
+var mountIndex = 0;
+var containerMap = {};
 function render(Vnode, container) {
 	if (typeNumber(container) !== 8) {
 		throw new Error("Target container is not a DOM element.");
 	}
-	let UniqueKey = container.UniqueKey;
+	var UniqueKey = container.UniqueKey;
 	if (container.UniqueKey);
 	else {
 		Vnode.isTop = true;
 		container.UniqueKey = mountIndex++;
 		containerMap[container.UniqueKey] = Vnode;
 		DuyRender(Vnode, container);
+		return Vnode._instance;
 	}
 }
-function DuyRender(Vnode, container) {
+function DuyRender(Vnode, container, isUpdate) {
+	var parentContext =
+		arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	if (!Vnode) return;
-	let type = Vnode.type,
-		props = Vnode.props;
-	if (!type) return;
-	let children = props.children;
-	let domNode = void 0;
-	let VnodeType = typeof type === "undefined" ? "undefined" : _typeof(type);
+	var type = Vnode.type,
+		_Vnode$props = Vnode.props,
+		props = _Vnode$props === undefined ? {} : _Vnode$props;
+	var children = props.children;
+	var domNode = void 0;
+	var VnodeType = typeof type === "undefined" ? "undefined" : _typeof(type);
 	if (VnodeType === "function") {
-		domNode = renderComponent(Vnode, container);
+		domNode = renderComponent(Vnode, container, parentContext);
 	}
 	if (VnodeType === "string") {
 		domNode = document.createElement(type);
@@ -147,7 +170,7 @@ function DuyRender(Vnode, container) {
 	mapProps(domNode, props);
 	children && mountChildren(children, domNode);
 	Vnode._hostNode = domNode;
-	Vnode._instance = container.appendChild(domNode);
+	container.appendChild(domNode);
 	return domNode;
 }
 function mountChildren(children, parentNode) {
@@ -159,25 +182,32 @@ function mountChildren(children, parentNode) {
 		DuyRender(children, parentNode);
 	}
 }
-function renderComponent(Vnode, container) {
-	let ComponentClass = Vnode.type;
-	let props = Vnode.props;
-	let instance = new ComponentClass(props);
-	let renderVnode = instance.render();
-	instance.Vnode = renderVnode;
+function renderComponent(Vnode, container, parentContext) {
+	var ComponentClass = Vnode.type;
+	var props = Vnode.props,
+		key = Vnode.key,
+		ref = Vnode.ref;
+	var instance = new ComponentClass(props);
 	Vnode._instance = instance;
-	return DuyRender(renderVnode, container);
+	if (instance.componentWillMount) {
+		var isCatched = catchError(instance, "componentWillMount", [Vnode]);
+		if (isCatched) return;
+	}
+	var renderedVnode = catchError(instance, "render", [Vnode]);
+	var renderedType = typeNumber(renderedVnode);
+	instance.Vnode = renderedVnode;
+	return DuyRender(renderedVnode, container);
 }
-let ReactDOM = {
+var ReactDOM = {
 	render: render
 };
 
-let _extends =
+var _extends =
 	Object.assign ||
 	function(target) {
-		for (let i = 1; i < arguments.length; i++) {
-			let source = arguments[i];
-			for (let key in source) {
+		for (var i = 1; i < arguments.length; i++) {
+			var source = arguments[i];
+			for (var key in source) {
 				if (Object.prototype.hasOwnProperty.call(source, key)) {
 					target[key] = source[key];
 				}
@@ -185,10 +215,10 @@ let _extends =
 		}
 		return target;
 	};
-let _createClass = (function() {
+var _createClass = (function() {
 	function defineProperties(target, props) {
-		for (let i = 0; i < props.length; i++) {
-			let descriptor = props[i];
+		for (var i = 0; i < props.length; i++) {
+			var descriptor = props[i];
 			descriptor.enumerable = descriptor.enumerable || false;
 			descriptor.configurable = true;
 			if ("value" in descriptor) descriptor.writable = true;
@@ -206,15 +236,15 @@ function _classCallCheck$1(instance, Constructor) {
 		throw new TypeError("Cannot call a class as a function");
 	}
 }
-let ComStatue = {
+var ComStatue = {
 	CREATE: 0,
 	MOUNT: 1,
 	UPDATING: 2,
 	UPDATED: 3,
 	MOUNTTING: 4
 };
-let uniqueId = 0;
-let Component = (function() {
+var uniqueId = 0;
+var Component = (function() {
 	function Component(props, context) {
 		_classCallCheck$1(this, Component);
 		this.props = props;
@@ -231,11 +261,11 @@ let Component = (function() {
 		{
 			key: "setState",
 			value: function setState(nState) {
-				let preState = this.state;
-				let oldVnode = this.Vnode;
+				var preState = this.state;
+				var oldVnode = this.Vnode;
 				this.nextState = _extends({}, preState, nState);
 				this.state = this.nextState;
-				let newVnode = this.render();
+				var newVnode = this.render();
 				this.updateComponent(this, oldVnode, newVnode);
 			}
 		},
@@ -255,7 +285,7 @@ let Component = (function() {
 	return Component;
 })();
 
-let React = {
+var React = {
 	createElement: createElement,
 	ReactDOM: ReactDOM,
 	Component: Component

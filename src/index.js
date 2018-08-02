@@ -48,7 +48,6 @@ ReactDOM.render(
 		style={{ background: "#eee", width: "100px", height: "100px" }}
 		className="fuck"
 	>
-		{1111}
 		<Test />
 		<div style={{ width: "10px", height: "10px", background: "red" }} />
 	</div>,
