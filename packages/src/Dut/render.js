@@ -2,6 +2,7 @@ import { mapProps } from "./mapProps";
 import { typeNumber } from "./utils";
 import { catchError } from "./ErrorUtil";
 import { Vnode } from "./createElement";
+import { setRef } from "./refs";
 
 let mountIndex = 0; //全局变量
 let containerMap = {};
@@ -91,8 +92,8 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 		if (isCatched) return;
 	}
 
-	//   let lastOwner = currentOwner.cur //记录上个实例
-	//   currentOwner.cur = instance //存储当前实例
+	let lastOwner = currentOwner.cur; //记录上个实例
+	currentOwner.cur = instance; //存储当前实例  下面new Vnode操作时会自动当前实例为生成Vnode父实例
 
 	let renderedVnode = catchError(instance, "render", [Vnode]); //执行render并记录生成的Vnode  有错误则提示
 	const renderedType = typeNumber(renderedVnode);
@@ -105,7 +106,7 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 		//string or number
 		renderedVnode = new Vnode("#text", renderedVnode, null, null);
 	}
-	// currentOwner.cur = lastOwner
+	currentOwner.cur = lastOwner; //还原为当前Vnode父实例
 
 	if (renderedVnode === void 2333) {
 		return;
@@ -132,6 +133,12 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 	//   } else {
 	//     domNode = renderedVnode[0]._hostNode
 	//   }
+
+	// 挂载组件实例或者原生对应domNode
+	setRef(Vnode, instance, domNode);
+
+	// Vnode._hostNode = domNode
+	// instance.Vnode._hostNode = domNode //用于在更新时期oldVnode的时候获取_hostNode
 
 	//记录实例的renderVnode
 	instance.Vnode = renderedVnode;

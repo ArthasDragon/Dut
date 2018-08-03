@@ -54,7 +54,7 @@ ReactDOM.render(
 	document.getElementById("root")
 );
 console.log(
-	<div>
+	<div a={222} ref={111}>
 		{[54654654, [21321, 231321, [21321, 2131]]]}
 		<input type="text" value="232323" />
 	</div>

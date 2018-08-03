@@ -1,4 +1,5 @@
 import { typeNumber } from "./utils";
+import { currentOwner } from "./render";
 
 const RESERVED_PROPS = {
 	ref: true,
@@ -9,6 +10,7 @@ const RESERVED_PROPS = {
 
 export class Vnode {
 	constructor(type, props, key, ref) {
+		this.owner = currentOwner.cur;
 		this.type = type; //节点类型
 		this.props = props; //各种属性
 		this.key = key; //key
