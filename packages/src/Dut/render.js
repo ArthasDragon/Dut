@@ -140,11 +140,14 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 	// Vnode._hostNode = domNode
 	// instance.Vnode._hostNode = domNode //用于在更新时期oldVnode的时候获取_hostNode
 
-	//记录实例的renderVnode
-	instance.Vnode = renderedVnode;
+	// if (renderedVnode._PortalHostNode) {
+	// 	//支持react createPortal
+	// 	Vnode._PortalHostNode = renderedVnode._PortalHostNode
+	// 	renderedVnode._PortalHostNode._PortalHostNode = domNode
+	//   }
 
-	//返回renderVnode对应的domNode
-	return DuyRender(renderedVnode, parentDomNode);
+	instance._updateInLifeCycle(); // componentDidMount之后一次性更新
+	return domNode;
 }
 
 export const ReactDOM = {
