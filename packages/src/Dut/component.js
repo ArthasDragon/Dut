@@ -77,11 +77,26 @@ export default class Component {
 	}
 
 	updateComponent() {
+		//记录更新前state   vnode   context
 		const preState = this.state;
 		const oldVnode = this.Vnode;
 		const oldContext = this.context;
 
+		//初始化更新后state
 		this.nextState = this.state;
+
+		//将_penddingState中存的state合成为一个新的state
+		this._penddingState.forEach(item => {
+			if (typeof item.partialNewState === "function") {
+				this.nextState = Object.assign(
+					{},
+					this.nextState,
+					item.partialNewState(this.nextState, this.props)
+				);
+			} else {
+				this.nextState = Object.assign({}, this.state, item.partialNewState);
+			}
+		});
 	}
 	_updateInLifeCycle() {}
 
