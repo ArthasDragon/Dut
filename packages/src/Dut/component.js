@@ -23,27 +23,88 @@ export default class Component {
 		this.refs = {}; //组件对应dom节点
 		this._uniqueId = uniqueId++; //组件唯一id
 		this._penddingState = []; //状态存储   存储每一次setState  更新组件时一起合并触发
-		this.stateMergeQueue = [];
+		this.stateMergeQueue = []; //存储是否应该更新state的信息
 	}
 
-	setState(nState) {
-		const preState = this.state; //保存更新之前的state
-		const oldVnode = this.Vnode; //更新前的Vnode   用于diff
+	/**
+	 * setState时不进行更新   事件之后一起更新  先缓存到_peddingState中
+	 * @param {Function | Object} partialNewState    部分新state
+	 * @param {Function} callback     回调
+	 */
+	setState(partialNewState, callback) {
+		this._penddingState.push({ partialNewState, callback });
 
-		this.nextState = { ...preState, ...nState }; //更新后的state
-		this.state = this.nextState;
-		const newVnode = this.render(); //state改变后的Vnode
+		//生命周期判断组件是否需要更新
+		// if (this.shouldComponentUpdate) {
+		// 	let shouldUpdate = this.shouldComponentUpdate(this.props, this.nextState, this.context)
+		// 	if (!shouldUpdate) {
+		// 	  return
+		// 	}
+		//   }
 
-		this.updateComponent(this, oldVnode, newVnode);
-	}
-
-	updateComponent(instance, oldVnode, newVnode) {
-		if (oldVnode.type === newVnode.type) {
-			mapProps(oldVnode._hostNode, newVnode.props);
+		if (this.lifeCycle === Com.CREATE) {
+			//组件挂载期
 		} else {
-			//remove
+			//组件更新期
+			if (this.lifeCycle === Com.UPDATING) {
+				return;
+			}
+
+			if (this.lifeCycle === Com.MOUNTTING) {
+				//componentDidMount的时候调用setState
+				this.stateMergeQueue.push(1); //stateMergeQueue中存在值时updateComponent中会进行组件更新
+				return;
+			}
+
+			if (this.lifeCycle === Com.CATCHING) {
+				//componentDidMount的时候调用setState
+				this.stateMergeQueue.push(1);
+				return;
+			}
+
+			//   if (options.async === true) {
+			//     //事件中调用
+			//     let dirty = options.dirtyComponent[this._uniqueId];
+			//     if (!dirty) {
+			//       options.dirtyComponent[this._uniqueId] = this;
+			//     }
+			//     return;
+			//   }
+
+			//不在生命周期中调用，有可能是异步调用
+			this.updateComponent();
 		}
 	}
 
+	updateComponent() {
+		//记录更新前state   vnode   context
+		const preState = this.state;
+		const oldVnode = this.Vnode;
+		const oldContext = this.context;
+
+		//初始化更新后state
+		this.nextState = this.state;
+
+		//将_penddingState中存的state合成为一个新的state
+		this._penddingState.forEach(item => {
+			if (typeof item.partialNewState === "function") {
+				this.nextState = Object.assign(
+					{},
+					this.nextState,
+					item.partialNewState(this.nextState, this.props)
+				);
+			} else {
+				this.nextState = Object.assign({}, this.state, item.partialNewState);
+			}
+		});
+	}
+	_updateInLifeCycle() {}
+
+	//预定义生命周期函数和render
+	componentWillReceiveProps() {}
+	componentWillMount() {}
+	componentDidMount() {}
+	componentWillUnmount() {}
+	componentDidUnmount() {}
 	render() {}
 }
