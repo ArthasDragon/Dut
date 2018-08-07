@@ -1,4 +1,6 @@
 import { mapProps } from "./mapProps";
+import { catchError } from "./ErrorUtil";
+import { currentOwner } from "./render";
 
 //组件状态
 export const ComStatue = {
@@ -97,6 +99,31 @@ export default class Component {
 				this.nextState = Object.assign({}, this.state, item.partialNewState);
 			}
 		});
+
+		//更新state
+		if (this.nextState !== prevState) {
+			this.state = this.nextState;
+		}
+
+		//   if (this.getChildContext) {
+		// 	this.context = extend(extend({}, this.context), this.getChildContext())
+		//   }
+
+		//触发生命周期  componentWillUpdate
+		if (this.componentWillUpdate) {
+			catchError(this, "componentWillUpdate", [
+				this.props,
+				this.nextState,
+				this.context
+			]);
+		}
+
+		let lastOwner = currentOwner.cur; //记录当前父级实例
+		currentOwner.cur = this; //将此实例记录为当前实例  生成render中Vnode时  父级实例为当前实例
+		this.nextState = null; //制空
+		let newVnode = this.render(); //初始化render生成Vnode
+		newVnode = newVnode ? newVnode : new Vnode("#text", "", null, null); //如render返回空则为空字符Vnode
+		currentOwner.cur = lastOwner; //还原
 	}
 	_updateInLifeCycle() {}
 
