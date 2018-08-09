@@ -35,3 +35,5 @@ export function updateChild(
 		newLength = newChildren.length,
 		oldStartIndex = 0;
 }
+
+export function update() {}

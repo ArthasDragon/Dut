@@ -1,6 +1,7 @@
 import { mapProps } from "./mapProps";
 import { catchError } from "./ErrorUtil";
 import { currentOwner } from "./render";
+import { update } from "./vdom";
 
 //组件状态
 export const ComStatue = {
@@ -124,6 +125,27 @@ export default class Component {
 		let newVnode = this.render(); //初始化render生成Vnode
 		newVnode = newVnode ? newVnode : new Vnode("#text", "", null, null); //如render返回空则为空字符Vnode
 		currentOwner.cur = lastOwner; //还原
+
+		this.Vnode = update(oldVnode, newVnode, this.Vnode._hostNode, this.context); //更新  这个函数返回一个更新后的Vnode
+
+		//触发componentDidUpdate
+		if (this.componentDidUpdate) {
+			catchError(this, "componentDidUpdate", [
+				this.props,
+				prevState,
+				oldContext
+			]);
+		}
+
+		//统一调用所有setState时的callback
+		this._penddingState.forEach(item => {
+			if (typeof item.callback === "function") {
+				item.callback(this.state, this.props);
+			}
+		});
+
+		//置空
+		this._penddingState = [];
 	}
 	_updateInLifeCycle() {}
 
