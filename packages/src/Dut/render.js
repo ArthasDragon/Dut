@@ -137,8 +137,8 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 	// 挂载组件实例或者原生对应domNode
 	setRef(Vnode, instance, domNode);
 
-	// Vnode._hostNode = domNode
-	// instance.Vnode._hostNode = domNode //用于在更新时期oldVnode的时候获取_hostNode
+	Vnode._hostNode = domNode; //记录Vnode对应domNode
+	instance.Vnode._hostNode = domNode; //用于在更新时期oldVnode的时候获取_hostNode
 
 	// if (renderedVnode._PortalHostNode) {
 	// 	//支持react createPortal
