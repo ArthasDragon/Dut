@@ -1,7 +1,6 @@
-import { mapProps } from "./mapProps";
 import { catchError } from "./ErrorUtil";
 import { currentOwner } from "./render";
-import { update } from "./vdom";
+import { update } from "./update";
 import { Vnode } from "./createElement";
 
 //组件状态
@@ -148,7 +147,17 @@ export default class Component {
 		//置空
 		this._penddingState = [];
 	}
-	_updateInLifeCycle() {}
+	_updateInLifeCycle() {
+		if (this.stateMergeQueue.length > 0) {
+			let tempState = this.state;
+			this._penddingState.forEach(item => {
+				tempState = Object.assign({}, tempState, ...item.partialNewState);
+			});
+			this.nextState = { ...tempState };
+			this.stateMergeQueue = [];
+			this.updateComponent();
+		}
+	}
 
 	//预定义生命周期函数和render
 	componentWillReceiveProps() {}

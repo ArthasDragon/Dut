@@ -10,8 +10,8 @@ export function catchError(Instance, hookname, args) {
 			return result;
 		}
 	} catch (e) {
-		let Vnode;
-		Vnode = Instance.Vnode;
+		let Vnode = Instance.Vnode;
+
 		if (hookname === "render" || hookname === "componentWillMount") {
 			//对render和componentWillMount进行特殊处理
 			Vnode = args[0];

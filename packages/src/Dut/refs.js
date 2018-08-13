@@ -8,12 +8,12 @@ import { typeNumber } from "./utils";
  * @param {domNode} domNode
  */
 export function setRef(Vnode, instance, domNode) {
-	// if(instance)
-	const refType = typeNumber(Vnode.ref);
-	if (refStrategy(refType)) {
-		refStrategy[refType](Vnode, Vnode.owner, domNode);
+	if (instance) {
+		const refType = typeNumber(Vnode.ref);
+		if (refStrategy[refType]) {
+			refStrategy[refType](Vnode, Vnode.owner, domNode);
+		}
 	}
-	// }
 }
 
 //ref处理策略  string or number时挂载domNode或者实例    function时执行ref  参数为实例或者domNode

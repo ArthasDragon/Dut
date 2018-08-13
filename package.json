@@ -11,7 +11,7 @@
     "start": "node scripts/start.js",
     "precommit": "lint-staged",
     "format": "prettier-eslint --write \"**/*.js\"",
-    "fix": "eslint --fix packages/src/**/*.js"
+    "fix": "eslint --fix **/*.js"
   },
   "lint-staged": {
     "*.js": [

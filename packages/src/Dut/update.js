@@ -1,4 +1,6 @@
 import { flattenChildren } from "./createElement";
+import { typeNumber } from "./utils";
+import { updateProps } from "./mapProps";
 
 /**
  * 更新文字节点
@@ -34,4 +36,24 @@ export function updateChild(
 		oldStartIndex = 0;
 }
 
-export function update() {}
+export function updateComponent() {}
+
+/**
+ * 将oldVnode更新为newVnode
+ * @param {Vnode} oldVnode
+ * @param {Vnode} newVnode
+ * @param {DomNode} parentDomNode
+ * @param {Object} parentContext
+ */
+export function update(oldVnode, newVnode, parentDomNode, parentContext) {
+	//newVnode没有render  还没有绑定_hostNode
+	newVnode._hostNode = oldVnode._hostNode;
+
+	if (oldVnode.type === newVnode.type) {
+		if (typeNumber(oldVnode.type) === 4) {
+			//string   原生节点   div,p ...
+			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
+			return newVnode;
+		}
+	}
+}

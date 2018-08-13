@@ -14,8 +14,8 @@ class Test extends Component {
 					"grey",
 					"#133234",
 					"#123213",
-					"222345",
-					"998232"
+					"#222345",
+					"#998232"
 				];
 				const rand = parseInt(Math.min(10, Math.random() * 10));
 				this.setState({
