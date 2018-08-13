@@ -10,7 +10,8 @@
     "build": "rollup -c ./scripts/build/rollup.js",
     "start": "node scripts/start.js",
     "precommit": "lint-staged",
-    "format": "prettier-eslint --write \"**/*.js\""
+    "format": "prettier-eslint --write \"**/*.js\"",
+    "fix": "eslint --fix packages/src/**/*.js"
   },
   "lint-staged": {
     "*.js": [
@@ -31,6 +32,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "css-loader": "^1.0.0",
     "eslint": "^4.19.1",
+    "eslint-config-dragon-npmpackage": "^1.2.0",
     "eslint-plugin-react": "^7.10.0",
     "happypack": "^5.0.0",
     "html-webpack-plugin": "^3.2.0",

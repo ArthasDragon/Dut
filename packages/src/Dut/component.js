@@ -2,6 +2,7 @@ import { mapProps } from "./mapProps";
 import { catchError } from "./ErrorUtil";
 import { currentOwner } from "./render";
 import { update } from "./vdom";
+import { Vnode } from "./createElement";
 
 //组件状态
 export const ComStatue = {
@@ -45,21 +46,21 @@ export default class Component {
 		// 	}
 		//   }
 
-		if (this.lifeCycle === Com.CREATE) {
+		if (this.lifeCycle === ComStatue.CREATE) {
 			//组件挂载期
 		} else {
 			//组件更新期
-			if (this.lifeCycle === Com.UPDATING) {
+			if (this.lifeCycle === ComStatue.UPDATING) {
 				return;
 			}
 
-			if (this.lifeCycle === Com.MOUNTTING) {
+			if (this.lifeCycle === ComStatue.MOUNTTING) {
 				//componentDidMount的时候调用setState
 				this.stateMergeQueue.push(1); //stateMergeQueue中存在值时updateComponent中会进行组件更新
 				return;
 			}
 
-			if (this.lifeCycle === Com.CATCHING) {
+			if (this.lifeCycle === ComStatue.CATCHING) {
 				//componentDidMount的时候调用setState
 				this.stateMergeQueue.push(1);
 				return;
@@ -102,7 +103,7 @@ export default class Component {
 		});
 
 		//更新state
-		if (this.nextState !== prevState) {
+		if (this.nextState !== preState) {
 			this.state = this.nextState;
 		}
 
@@ -132,7 +133,7 @@ export default class Component {
 		if (this.componentDidUpdate) {
 			catchError(this, "componentDidUpdate", [
 				this.props,
-				prevState,
+				preState,
 				oldContext
 			]);
 		}

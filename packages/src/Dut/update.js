@@ -25,12 +25,10 @@ export function updateChild(
 	parentDomNode,
 	parentContext
 ) {
-	newChild = flattenChildren(newChild); //扁平化newChild
-
+	newChildren = flattenChildren(newChildren); //扁平化newChild
 	//非数组则转为数组
 	if (!Array.isArray(oldChildren)) oldChildren = [oldChildren];
 	if (!Array.isArray(newChildren)) newChildren = [newChildren];
-
 	let oldLength = oldChildren.length,
 		newLength = newChildren.length,
 		oldStartIndex = 0;
