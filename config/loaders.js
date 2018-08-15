@@ -1,5 +1,6 @@
 const paths = require("./paths");
 const generateCssLoader = require("./generateCssLoader");
+const path = require("path");
 
 module.exports = [
 	{
@@ -15,6 +16,12 @@ module.exports = [
 		include: paths.appNodeModules,
 		happyId: "css"
 	}),
+	{
+		test: /\.jsx?$/,
+		loader: "eslint-loader",
+		enforce: "pre",
+		include: path.join(__dirname, "../src")
+	},
 	{
 		test: /\.(jpe?g|png|gif|svg)$/,
 		use: {

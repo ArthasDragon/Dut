@@ -148,12 +148,8 @@ export default class Component {
 		this._penddingState = [];
 	}
 	_updateInLifeCycle() {
+		//state队列中有值才进行更新
 		if (this.stateMergeQueue.length > 0) {
-			let tempState = this.state;
-			this._penddingState.forEach(item => {
-				tempState = Object.assign({}, tempState, ...item.partialNewState);
-			});
-			this.nextState = { ...tempState };
 			this.stateMergeQueue = [];
 			this.updateComponent();
 		}
