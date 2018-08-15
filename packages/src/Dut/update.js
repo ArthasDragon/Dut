@@ -50,6 +50,7 @@ export function update(oldVnode, newVnode, parentDomNode, parentContext) {
 	newVnode._hostNode = oldVnode._hostNode;
 
 	if (oldVnode.type === newVnode.type) {
+		//新老Vnode类型相同
 		if (typeNumber(oldVnode.type) === 4) {
 			//string   原生节点   div,p ...
 			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
