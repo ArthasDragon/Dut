@@ -1,6 +1,7 @@
 import { flattenChildren } from "./createElement";
 import { typeNumber } from "./utils";
 import { updateProps } from "./mapProps";
+import { setRef } from "./refs";
 
 /**
  * 更新文字节点
@@ -51,10 +52,33 @@ export function update(oldVnode, newVnode, parentDomNode, parentContext) {
 
 	if (oldVnode.type === newVnode.type) {
 		//新老Vnode类型相同
-		if (typeNumber(oldVnode.type) === 4) {
-			//string   原生节点   div,p ...
-			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
+
+		//text节点单独处理
+		if (oldVnode.type === "#text") {
+			newVnode._hostNode = oldVnode._hostNode; //更新一个dom节点
+			updateText(oldVnode, newVnode);
+
 			return newVnode;
 		}
+
+		//string   原生节点   div,p ...
+		if (typeNumber(oldVnode.type) === 4) {
+			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
+
+			//ref改变则重新将新ref置入owner
+			if (oldVnode.ref !== newVnode.ref) {
+				setRef(newVnode, oldVnode.owner, newVnode._hostNode);
+			}
+
+			//更新后的child，返回给组件
+			// newVnode.props.children = updateChild(
+			// 	oldVnode.props.children,
+			// 	newVnode.props.children,
+			// 	oldVnode._hostNode,
+			// 	parentContext
+			// );
+		}
 	}
+
+	return newVnode;
 }

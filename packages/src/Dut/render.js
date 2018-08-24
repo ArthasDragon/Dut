@@ -13,7 +13,11 @@ export let currentOwner = {
 	cur: null
 };
 
-//将Vnode放进container中并返回Vnode对应的domNode
+/**
+ *将Vnode放进container中并返回Vnode对应的domNode
+ * @param {Vnode} Vnode
+ * @param {DomNode} container
+ */
 function render(Vnode, container) {
 	if (typeNumber(container) !== 8) {
 		throw new Error(`Target container is not a DOM element.`);
@@ -79,7 +83,12 @@ function mountChildren(children, parentNode) {
 	}
 }
 
-//将Component中renderVnode的domNode返回  并将renderVnode记录在Vnode节点下
+/**
+ * 将Component中renderVnode的domNode返回  并将renderVnode记录在Vnode节点下
+ * @param {Vnode} Vnode
+ * @param {DomNode} parentDomNode
+ * @param {*} parentContext
+ */
 function renderComponent(Vnode, parentDomNode, parentContext) {
 	const ComponentClass = Vnode.type;
 	const { props, key, ref } = Vnode;

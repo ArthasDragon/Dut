@@ -1,5 +1,5 @@
 /**
- * by 暗影舞者 Copyright 2018-08-13
+ * by 暗影舞者 Copyright 2018-08-24
  */
 
 var __type = Object.prototype.toString;
@@ -87,13 +87,14 @@ function triggerEventByPath(e, path) {
 }
 function getEventPath(event, end) {
 	var path = [];
+	var pathEnd = end || document;
 	var begin = event.target;
 	while (1) {
 		if (begin.__events) {
 			path.push(begin);
 		}
 		begin = begin.parentNode;
-		if (!begin) {
+		if (!begin || begin === pathEnd) {
 			break;
 		}
 	}
@@ -234,8 +235,7 @@ function catchError(Instance, hookname, args) {
 			return result;
 		}
 	} catch (e) {
-		var Vnode = void 0;
-		Vnode = Instance.Vnode;
+		var Vnode = Instance.Vnode;
 		if (hookname === "render" || hookname === "componentWillMount") {
 			Vnode = args[0];
 		}
@@ -270,29 +270,30 @@ var refStrategy = {
 	}
 };
 
+function updateText(oldTextVnode, newTextVnode) {
+	var dom = oldTextVnode._hostNode;
+	if (oldTextVnode.props !== newTextVnode.props) {
+		dom.nodeValue = newTextVnode.props;
+	}
+}
 function update(oldVnode, newVnode, parentDomNode, parentContext) {
 	newVnode._hostNode = oldVnode._hostNode;
 	if (oldVnode.type === newVnode.type) {
-		if (typeNumber(oldVnode.type) === 4) {
-			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
+		if (oldVnode.type === "#text") {
+			newVnode._hostNode = oldVnode._hostNode;
+			updateText(oldVnode, newVnode);
 			return newVnode;
 		}
-	}
-}
-
-var _extends =
-	Object.assign ||
-	function(target) {
-		for (var i = 1; i < arguments.length; i++) {
-			var source = arguments[i];
-			for (var key in source) {
-				if (Object.prototype.hasOwnProperty.call(source, key)) {
-					target[key] = source[key];
-				}
+		if (typeNumber(oldVnode.type) === 4) {
+			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
+			if (oldVnode.ref !== newVnode.ref) {
+				setRef(newVnode, oldVnode.owner, newVnode._hostNode);
 			}
 		}
-		return target;
-	};
+	}
+	return newVnode;
+}
+
 var _createClass = (function() {
 	function defineProperties(target, props) {
 		for (var i = 0; i < props.length; i++) {
@@ -309,16 +310,6 @@ var _createClass = (function() {
 		return Constructor;
 	};
 })();
-function _toConsumableArray(arr) {
-	if (Array.isArray(arr)) {
-		for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-			arr2[i] = arr[i];
-		}
-		return arr2;
-	} else {
-		return Array.from(arr);
-	}
-}
 function _classCallCheck(instance, Constructor) {
 	if (!(instance instanceof Constructor)) {
 		throw new TypeError("Cannot call a class as a function");
@@ -434,14 +425,6 @@ var Component = (function() {
 			key: "_updateInLifeCycle",
 			value: function _updateInLifeCycle() {
 				if (this.stateMergeQueue.length > 0) {
-					var tempState = this.state;
-					this._penddingState.forEach(function(item) {
-						tempState = Object.assign.apply(
-							Object,
-							[{}, tempState].concat(_toConsumableArray(item.partialNewState))
-						);
-					});
-					this.nextState = _extends({}, tempState);
 					this.stateMergeQueue = [];
 					this.updateComponent();
 				}
