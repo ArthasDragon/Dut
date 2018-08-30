@@ -4,6 +4,19 @@ import { updateProps } from "./mapProps";
 import { setRef } from "./refs";
 
 /**
+ * 获取Vnode对应实例的信息
+ * @param {Vnode} componentVnode
+ */
+function instanceProps(componentVnode) {
+	return {
+		oldState: componentVnode._instance.state,
+		oldProps: componentVnode._instance.props,
+		oldContext: componentVnode._instance.context,
+		oldVnode: componentVnode._instance.Vnode
+	};
+}
+
+/**
  * 更新文字节点
  * @param {Vnode} oldTextVnode
  * @param {Vnode} newTextVnode
@@ -37,7 +50,19 @@ export function updateChild(
 		oldStartIndex = 0;
 }
 
-export function updateComponent() {}
+/**
+ *
+ * @param {Vnode} oldVnode
+ * @param {Vnode} newVnode
+ * @param {Object} parentContext
+ */
+export function updateComponent(oldVnode, newVnode, parentContext) {
+	const { oldState, oldProps, oldContext, oldVnode } = instanceProps(oldVnode);
+
+	const newProps = newVnode.props;
+	let newContext = parentContext;
+	const instance = oldVnode._instance;
+}
 
 /**
  * 将oldVnode更新为newVnode
@@ -77,6 +102,21 @@ export function update(oldVnode, newVnode, parentDomNode, parentContext) {
 			// 	oldVnode._hostNode,
 			// 	parentContext
 			// );
+		}
+
+		//function   class
+		if (typeNumber(oldVnode.type) === 5) {
+			if (!oldVnode._instance.render) {
+				//老的class  render中没有内容
+				const { props } = newVnode;
+				const newStateLessInstance = new newVnode.type(props, parentContext);
+				//oldVnode instance的关联关系赋值给newVnode instance
+				newStateLessInstance.owner = oldVnode._instance.owner;
+				newStateLessInstance.ref = oldVnode._instance.ref;
+				newStateLessInstance.key = oldVnode._instance.key;
+				newVnode._instance = newStateLessInstance;
+				return newVnode;
+			}
 		}
 	}
 

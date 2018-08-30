@@ -290,6 +290,17 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
 				setRef(newVnode, oldVnode.owner, newVnode._hostNode);
 			}
 		}
+		if (typeNumber(oldVnode.type) === 5) {
+			if (!oldVnode._instance.render) {
+				var props = newVnode.props;
+				var newStateLessInstance = new newVnode.type(props, parentContext);
+				newStateLessInstance.owner = oldVnode._instance.owner;
+				newStateLessInstance.ref = oldVnode._instance.ref;
+				newStateLessInstance.key = oldVnode._instance.key;
+				newVnode._instance = newStateLessInstance;
+				return newVnode;
+			}
+		}
 	}
 	return newVnode;
 }

@@ -48,8 +48,8 @@ console.log(
 		className="fuck"
 	>
 		111
-		{/* <Test />
-		<div style={{ width: "10px", height: "10px", background: "red" }} /> */}
+		<Test />
+		<div style={{ width: "10px", height: "10px", background: "red" }} />
 	</div>
 );
 
