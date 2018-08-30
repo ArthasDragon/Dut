@@ -1,5 +1,5 @@
 /**
- * by 暗影舞者 Copyright 2018-08-24
+ * by 暗影舞者 Copyright 2018-08-30
  */
 
 var __type = Object.prototype.toString;
@@ -476,6 +476,9 @@ var containerMap = {};
 var currentOwner = {
 	cur: null
 };
+function mountIndexAdd() {
+	return mountIndex++;
+}
 function render(Vnode$$1, container) {
 	if (typeNumber(container) !== 8) {
 		throw new Error("Target container is not a DOM element.");
@@ -502,18 +505,25 @@ function DuyRender(Vnode$$1, container, isUpdate) {
 	var VnodeType = typeof type === "undefined" ? "undefined" : _typeof(type);
 	if (VnodeType === "function") {
 		domNode = renderComponent(Vnode$$1, container, parentContext);
-	}
-	if (VnodeType === "string") {
+	} else if (VnodeType === "string" && type === "#text") {
+		domNode = renderTextComponent(Vnode$$1);
+	} else {
 		domNode = document.createElement(type);
 	}
 	mapProps(domNode, props);
-	children && mountChildren(children, domNode);
+	children && mountChildren(flattenChildren(children), domNode);
 	Vnode$$1._hostNode = domNode;
 	container.appendChild(domNode);
 	return domNode;
 }
+function renderTextComponent(Vnode$$1) {
+	var fixText = Vnode$$1.props === "createPortal" ? "" : Vnode$$1.props;
+	var textDomNode = document.createTextNode(fixText);
+	Vnode$$1._mountIndex = mountIndexAdd();
+	return textDomNode;
+}
 function mountChildren(children, parentNode) {
-	if (children.length > 1) {
+	if (Array.isArray(children)) {
 		children.forEach(function(child) {
 			return DuyRender(child, parentNode);
 		});
@@ -632,6 +642,61 @@ function createElement(type, config) {
 		}
 	}
 	return new Vnode(type, props, key, ref);
+}
+function flattenChildren(children, parentVnode) {
+	if (children === undefined) return new Vnode("#text", "", null, null);
+	var length = children.length;
+	var arr = [],
+		isLastSimple = false,
+		lastString = "",
+		childType = typeNumber(children);
+	if (childType === 4 || childType === 3) {
+		return new Vnode("#text", children, null, null);
+	}
+	if (childType !== 7) {
+		return children;
+	}
+	children.forEach(function(item, index) {
+		var itemType = typeNumber(item);
+		if (itemType === 7) {
+			if (isLastSimple) {
+				arr.push(lastString);
+			}
+			item.forEach(function(it) {
+				arr.push(it);
+			});
+			lastString = "";
+			isLastSimple = false;
+		} else if (itemType === 3 || itemType === 4) {
+			lastString += item;
+			isLastSimple = true;
+		} else {
+			if (isLastSimple) {
+				arr.push(lastString);
+				arr.push(item);
+				lastString = "";
+				isLastSimple = false;
+			} else {
+				arr.push(item);
+			}
+		}
+		if (length - 1 === index) {
+			if (lastString) arr.push(lastString);
+		}
+	});
+	arr = arr.map(function(item) {
+		if (typeNumber(item) === 4) {
+			item = new Vnode("#text", item, null, null);
+		} else {
+			if (item) {
+				if (typeNumber(item) !== 3 && typeNumber(item) !== 4) {
+					if (parentVnode) item.return = parentVnode;
+				}
+			}
+		}
+		return item;
+	});
+	return arr;
 }
 
 var React = {

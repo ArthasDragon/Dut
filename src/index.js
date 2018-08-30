@@ -47,9 +47,9 @@ console.log(
 		style={{ background: "#eee", width: "100px", height: "100px" }}
 		className="fuck"
 	>
-		1111
-		<Test />
-		<div style={{ width: "10px", height: "10px", background: "red" }} />
+		111
+		{/* <Test />
+		<div style={{ width: "10px", height: "10px", background: "red" }} /> */}
 	</div>
 );
 
@@ -58,14 +58,9 @@ ReactDOM.render(
 		style={{ background: "#eee", width: "100px", height: "100px" }}
 		className="fuck"
 	>
+		111
 		<Test />
 		<div style={{ width: "10px", height: "10px", background: "red" }} />
 	</div>,
 	document.getElementById("root")
-);
-console.log(
-	<div a={222} ref={111}>
-		{[54654654, [21321, 231321, [21321, 2131]]]}
-		<input type="text" value="232323" />
-	</div>
 );

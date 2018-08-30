@@ -1,7 +1,7 @@
 import { mapProps } from "./mapProps";
 import { typeNumber } from "./utils";
 import { catchError } from "./ErrorUtil";
-import { Vnode } from "./createElement";
+import { Vnode, flattenChildren } from "./createElement";
 import { setRef } from "./refs";
 import { ComStatue } from "./component";
 
@@ -12,6 +12,10 @@ let containerMap = {};
 export let currentOwner = {
 	cur: null
 };
+
+function mountIndexAdd() {
+	return mountIndex++;
+}
 
 /**
  *将Vnode放进container中并返回Vnode对应的domNode
@@ -55,8 +59,9 @@ function DuyRender(Vnode, container, isUpdate, parentContext = {}, instance) {
 	//初始化react dom树节点
 	if (VnodeType === "function") {
 		domNode = renderComponent(Vnode, container, parentContext);
-	}
-	if (VnodeType === "string") {
+	} else if (VnodeType === "string" && type === "#text") {
+		domNode = renderTextComponent(Vnode);
+	} else {
 		domNode = document.createElement(type);
 	}
 
@@ -64,7 +69,7 @@ function DuyRender(Vnode, container, isUpdate, parentContext = {}, instance) {
 	mapProps(domNode, props);
 
 	//将children挂载到domNode上
-	children && mountChildren(children, domNode);
+	children && mountChildren(flattenChildren(children), domNode);
 
 	//记录Vnode的domNode -----用于diff时改变自身dom
 	Vnode._hostNode = domNode;
@@ -75,8 +80,19 @@ function DuyRender(Vnode, container, isUpdate, parentContext = {}, instance) {
 	return domNode;
 }
 
+/**
+ * 将type=#text的Vnode转化为对应的DomNode
+ * @param {Vnode} Vnode
+ */
+function renderTextComponent(Vnode) {
+	let fixText = Vnode.props === "createPortal" ? "" : Vnode.props;
+	let textDomNode = document.createTextNode(fixText);
+	Vnode._mountIndex = mountIndexAdd();
+	return textDomNode;
+}
+
 function mountChildren(children, parentNode) {
-	if (children.length > 1) {
+	if (Array.isArray(children)) {
 		children.forEach(child => DuyRender(child, parentNode));
 	} else {
 		DuyRender(children, parentNode);
