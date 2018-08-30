@@ -4,7 +4,7 @@ import { updateProps } from "./mapProps";
 import { setRef } from "./refs";
 import { ComStatus } from "./component";
 import { catchError } from "./ErrorUtil";
-import { currentOwner } from "./render";
+import { currentOwner, DuyRender } from "./render";
 
 /**
  * 获取Vnode对应实例的信息
@@ -50,7 +50,25 @@ export function updateChild(
 	if (!Array.isArray(newChildren)) newChildren = [newChildren];
 	let oldLength = oldChildren.length,
 		newLength = newChildren.length,
-		oldStartIndex = 0;
+		oldStartIndex = 0,
+		newStartIndex = 0,
+		oldEndIndex = oldLength - 1,
+		newEndIndex = newLength - 1,
+		oldStartVnode = oldChildren[0],
+		newStartVnode = newChildren[0],
+		oldEndVnode = oldChildren[oldEndIndex],
+		newEndVnode = newChildren[newEndIndex],
+		hascode;
+
+	//while oldChildren is empty, update every newChildren's item. return updated newChildren
+	if (newLength >= 0 && !oldLength) {
+		newChildren.forEach((newVnode, index) => {
+			DuyRender(newVnode, parentDomNode, false, parentContext);
+			//重新赋值更新后的Vnode
+			newChildren[index] = newVnode;
+		});
+		return newChildren;
+	}
 }
 
 /**

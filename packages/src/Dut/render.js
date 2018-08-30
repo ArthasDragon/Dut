@@ -47,7 +47,13 @@ function render(Vnode, container) {
  * @param {Boolean} isUpdate  是否在更新中   在更新中则不进行挂载操作
  * @param {} instance  实现refs机制
  */
-function DuyRender(Vnode, container, isUpdate, parentContext = {}, instance) {
+export function DuyRender(
+	Vnode,
+	container,
+	isUpdate,
+	parentContext = {},
+	instance
+) {
 	if (!Vnode) return;
 
 	const { type, props = {} } = Vnode;
