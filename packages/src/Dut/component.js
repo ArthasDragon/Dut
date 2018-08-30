@@ -4,7 +4,7 @@ import { update } from "./update";
 import { Vnode } from "./createElement";
 
 //组件状态
-export const ComStatue = {
+export const ComStatus = {
 	CREATE: 0, //创造节点
 	MOUNT: 1, //节点已经挂载
 	UPDATING: 2, //节点正在更新
@@ -22,7 +22,7 @@ export default class Component {
 		this.context = context;
 
 		this.nextState = null; //用于更新
-		this.lifeCycle = ComStatue.CREATE; //组件生命周期
+		this.lifeCycle = ComStatus.CREATE; //组件生命周期
 		this.refs = {}; //组件对应dom节点
 		this._uniqueId = uniqueId++; //组件唯一id
 		this._penddingState = []; //状态存储   存储每一次setState  更新组件时一起合并触发
@@ -45,21 +45,21 @@ export default class Component {
 		// 	}
 		//   }
 
-		if (this.lifeCycle === ComStatue.CREATE) {
+		if (this.lifeCycle === ComStatus.CREATE) {
 			//组件挂载期
 		} else {
 			//组件更新期
-			if (this.lifeCycle === ComStatue.UPDATING) {
+			if (this.lifeCycle === ComStatus.UPDATING) {
 				return;
 			}
 
-			if (this.lifeCycle === ComStatue.MOUNTTING) {
+			if (this.lifeCycle === ComStatus.MOUNTTING) {
 				//componentDidMount的时候调用setState
 				this.stateMergeQueue.push(1); //stateMergeQueue中存在值时updateComponent中会进行组件更新
 				return;
 			}
 
-			if (this.lifeCycle === ComStatue.CATCHING) {
+			if (this.lifeCycle === ComStatus.CATCHING) {
 				//componentDidMount的时候调用setState
 				this.stateMergeQueue.push(1);
 				return;
@@ -127,7 +127,6 @@ export default class Component {
 		currentOwner.cur = lastOwner; //还原
 
 		this.Vnode = update(oldVnode, newVnode, this.Vnode._hostNode, this.context); //更新  这个函数返回一个更新后的Vnode
-
 		//触发componentDidUpdate
 		if (this.componentDidUpdate) {
 			catchError(this, "componentDidUpdate", [

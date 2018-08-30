@@ -3,7 +3,7 @@ import { typeNumber } from "./utils";
 import { catchError } from "./ErrorUtil";
 import { Vnode, flattenChildren } from "./createElement";
 import { setRef } from "./refs";
-import { ComStatue } from "./component";
+import { ComStatus } from "./component";
 
 let mountIndex = 0; //全局变量
 let containerMap = {};
@@ -175,10 +175,10 @@ function renderComponent(Vnode, parentDomNode, parentContext) {
 	if (instance.componentDidMount) {
 		//Moutting变量用于标记组件是否正在挂载
 		//如果正在挂载，则所有的setState全部都要合并
-		instance.lifeCycle = ComStatue.MOUNTTING;
+		instance.lifeCycle = ComStatus.MOUNTTING;
 		catchError(instance, "componentDidMount", []);
 		instance.componentDidMount = null; //防止用户调用
-		instance.lifeCycle = ComStatue.MOUNT;
+		instance.lifeCycle = ComStatus.MOUNT;
 	}
 
 	if (instance.componentDidCatch) {

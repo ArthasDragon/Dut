@@ -1,5 +1,11 @@
 import React, { ReactDOM, Component } from "react";
 
+class FirstChild extends Component {
+	render() {
+		return <div>{this.props.content ? 1111 : 2222}</div>;
+	}
+}
+
 class Test extends Component {
 	constructor(props) {
 		super(props);
@@ -19,39 +25,22 @@ class Test extends Component {
 				];
 				const rand = parseInt(Math.min(10, Math.random() * 10));
 				this.setState({
-					color: color[rand]
+					color: color[rand],
+					isFirst: !this.state.isFirst
 				});
 			}.bind(this),
-			1000
+			5000
 		);
 	}
 	state = {
-		color: "red"
+		color: "red",
+		isFirst: true
 	};
 
 	render() {
-		return (
-			<div
-				style={{
-					height: "100px",
-					width: "100px",
-					background: this.state.color
-				}}
-				className="I am FuckApp component"
-			/>
-		);
+		return <FirstChild content={this.state.isFirst} />;
 	}
 }
-console.log(
-	<div
-		style={{ background: "#eee", width: "100px", height: "100px" }}
-		className="fuck"
-	>
-		111
-		<Test />
-		<div style={{ width: "10px", height: "10px", background: "red" }} />
-	</div>
-);
 
 ReactDOM.render(
 	<div

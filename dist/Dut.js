@@ -38,6 +38,12 @@ function typeNumber(data) {
 function isEventName(name) {
 	return /^on[A-Z]/.test(name);
 }
+function extend(obj, props) {
+	for (var i in props) {
+		obj[i] = props[i];
+	}
+	return obj;
+}
 var noop = function noop() {};
 
 function addEvent(domNode, fn, eventName) {
@@ -270,10 +276,103 @@ var refStrategy = {
 	}
 };
 
+function instanceProps(componentVnode) {
+	return {
+		oldState: componentVnode._instance.state,
+		oldProps: componentVnode._instance.props,
+		oldContext: componentVnode._instance.context,
+		oldVnode: componentVnode._instance.Vnode
+	};
+}
 function updateText(oldTextVnode, newTextVnode) {
 	var dom = oldTextVnode._hostNode;
 	if (oldTextVnode.props !== newTextVnode.props) {
 		dom.nodeValue = newTextVnode.props;
+	}
+}
+function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
+	var _instanceProps = instanceProps(oldComponentVnode),
+		oldState = _instanceProps.oldState,
+		oldProps = _instanceProps.oldProps,
+		oldContext = _instanceProps.oldContext,
+		oldVnode = _instanceProps.oldVnode;
+	var newProps = newComponentVnode.props;
+	var newContext = parentContext;
+	var oldInstance = oldComponentVnode._instance;
+	oldInstance.props = newProps;
+	if (oldInstance.getChildContext) {
+		oldInstance.context = extend(
+			extend({}, newContext),
+			oldInstance.getChildContext()
+		);
+	} else {
+		oldInstance.context = extend({}, newContext);
+	}
+	oldInstance.lifeCycle = ComStatus.UPDATING;
+	if (oldInstance.componentWillReceiveProps) {
+		catchError(oldInstance, "componentWillReceiveProps", [
+			newProps,
+			newContext
+		]);
+		var mergedState = oldInstance.state;
+		oldInstance._penddingState.forEach(function(partialState) {
+			mergedState = extend(
+				extend({}, mergedState),
+				partialState.partialNewState
+			);
+		});
+		oldInstance.state = mergedState;
+	}
+	if (oldInstance.shouldComponentUpdate) {
+		var shouldUpdate = catchError(oldInstance, "shouldComponentUpdate", [
+			newProps,
+			oldState,
+			newContext
+		]);
+		if (!shouldUpdate) {
+			return;
+		}
+	}
+	if (oldInstance.componentWillUpdate) {
+		catchError(oldInstance, "componentWillUpdate", [
+			newProps,
+			oldState,
+			newContext
+		]);
+	}
+	var lastOwner = currentOwner.cur;
+	currentOwner.cur = oldComponentVnode._instance;
+	var newVnode = oldInstance.render
+		? catchError(oldInstance, "render", [])
+		: new newComponentVnode.type(newProps, newContext);
+	newVnode = newVnode ? newVnode : new Vnode("#text", "", null, null);
+	var fixedOldVnode = oldVnode ? oldVnode : oldInstance;
+	currentOwner.cur = lastOwner;
+	var willUpdate = options.dirtyComponent[oldInstance._uniqueId];
+	if (willUpdate) {
+		delete options.dirtyComponent[oldInstance._uniqueId];
+	}
+	update(
+		fixedOldVnode,
+		newVnode,
+		oldComponentVnode._hostNode,
+		oldInstance.context
+	);
+	oldComponentVnode._hostNode = newVnode._hostNode;
+	if (oldComponentVnode._instance.Vnode) {
+		oldComponentVnode._instance.Vnode = newVnode;
+	} else {
+		oldComponentVnode._instance = newVnode;
+	}
+	if (oldComponentVnode._instance) {
+		if (oldComponentVnode._instance.componentDidUpdate) {
+			catchError(oldComponentVnode._instance, "componentDidUpdate", [
+				oldProps,
+				oldState,
+				oldContext
+			]);
+		}
+		oldComponentVnode._instance.lifeCycle = ComStatus.UPDATED;
 	}
 }
 function update(oldVnode, newVnode, parentDomNode, parentContext) {
@@ -300,6 +399,14 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
 				newVnode._instance = newStateLessInstance;
 				return newVnode;
 			}
+			updateComponent(oldVnode, newVnode, parentContext);
+			newVnode.owner = oldVnode.owner;
+			newVnode.ref = oldVnode.ref;
+			newVnode.key = oldVnode.key;
+			newVnode._instance = oldVnode._instance;
+			newVnode._PortalHostNode = oldVnode._PortalHostNode
+				? oldVnode._PortalHostNode
+				: void 666;
 		}
 	}
 	return newVnode;
@@ -326,7 +433,7 @@ function _classCallCheck(instance, Constructor) {
 		throw new TypeError("Cannot call a class as a function");
 	}
 }
-var ComStatue = {
+var ComStatus = {
 	CREATE: 0,
 	MOUNT: 1,
 	UPDATING: 2,
@@ -341,7 +448,7 @@ var Component = (function() {
 		this.state = this.state || {};
 		this.context = context;
 		this.nextState = null;
-		this.lifeCycle = ComStatue.CREATE;
+		this.lifeCycle = ComStatus.CREATE;
 		this.refs = {};
 		this._uniqueId = uniqueId++;
 		this._penddingState = [];
@@ -355,16 +462,16 @@ var Component = (function() {
 					partialNewState: partialNewState,
 					callback: callback
 				});
-				if (this.lifeCycle === ComStatue.CREATE);
+				if (this.lifeCycle === ComStatus.CREATE);
 				else {
-					if (this.lifeCycle === ComStatue.UPDATING) {
+					if (this.lifeCycle === ComStatus.UPDATING) {
 						return;
 					}
-					if (this.lifeCycle === ComStatue.MOUNTTING) {
+					if (this.lifeCycle === ComStatus.MOUNTTING) {
 						this.stateMergeQueue.push(1);
 						return;
 					}
-					if (this.lifeCycle === ComStatue.CATCHING) {
+					if (this.lifeCycle === ComStatus.CATCHING) {
 						this.stateMergeQueue.push(1);
 						return;
 					}
@@ -582,10 +689,10 @@ function renderComponent(Vnode$$1, parentDomNode, parentContext) {
 	Vnode$$1._hostNode = domNode;
 	instance.Vnode._hostNode = domNode;
 	if (instance.componentDidMount) {
-		instance.lifeCycle = ComStatue.MOUNTTING;
+		instance.lifeCycle = ComStatus.MOUNTTING;
 		catchError(instance, "componentDidMount", []);
 		instance.componentDidMount = null;
-		instance.lifeCycle = ComStatue.MOUNT;
+		instance.lifeCycle = ComStatus.MOUNT;
 	}
 	instance._updateInLifeCycle();
 	return domNode;
