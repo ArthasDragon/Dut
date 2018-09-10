@@ -1,5 +1,5 @@
 /**
- * by 暗影舞者 Copyright 2018-08-30
+ * by 暗影舞者 Copyright 2018-09-10
  */
 
 var __type = Object.prototype.toString;
@@ -290,6 +290,25 @@ function updateText(oldTextVnode, newTextVnode) {
 		dom.nodeValue = newTextVnode.props;
 	}
 }
+function updateChild() {
+	var oldChildren =
+		arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+	var newChildren = arguments[1];
+	var parentDomNode = arguments[2];
+	oldChildren = flattenChildren(oldChildren);
+	newChildren = flattenChildren(newChildren);
+	if (!Array.isArray(oldChildren)) oldChildren = [oldChildren];
+	if (!Array.isArray(newChildren)) newChildren = [newChildren];
+	var oldLength = oldChildren.length,
+		newLength = newChildren.length,
+		oldEndIndex = oldLength - 1,
+		newEndIndex = newLength - 1,
+		oldStartVnode = oldChildren[0],
+		newStartVnode = newChildren[0],
+		oldEndVnode = oldChildren[oldEndIndex],
+		newEndVnode = newChildren[newEndIndex];
+	console.log(oldChildren, newChildren, parentDomNode);
+}
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 	var _instanceProps = instanceProps(oldComponentVnode),
 		oldState = _instanceProps.oldState,
@@ -388,6 +407,12 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
 			if (oldVnode.ref !== newVnode.ref) {
 				setRef(newVnode, oldVnode.owner, newVnode._hostNode);
 			}
+			newVnode.props.children = updateChild(
+				oldVnode.props.children,
+				newVnode.props.children,
+				oldVnode._hostNode,
+				parentContext
+			);
 		}
 		if (typeNumber(oldVnode.type) === 5) {
 			if (!oldVnode._instance.render) {

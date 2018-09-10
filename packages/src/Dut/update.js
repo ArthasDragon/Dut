@@ -44,6 +44,7 @@ export function updateChild(
 	parentDomNode,
 	parentContext
 ) {
+	oldChildren = flattenChildren(oldChildren);
 	newChildren = flattenChildren(newChildren); //扁平化newChild
 	//非数组则转为数组
 	if (!Array.isArray(oldChildren)) oldChildren = [oldChildren];
@@ -59,6 +60,7 @@ export function updateChild(
 		oldEndVnode = oldChildren[oldEndIndex],
 		newEndVnode = newChildren[newEndIndex],
 		hascode;
+	console.log(oldChildren, newChildren, parentDomNode);
 
 	//while oldChildren is empty, update every newChildren's item. return updated newChildren
 	if (newLength >= 0 && !oldLength) {
@@ -69,10 +71,17 @@ export function updateChild(
 		});
 		return newChildren;
 	}
+
+	// if (!newLength && oldLength >= 0) {
+	// 	oldChildren.forEach(oldVnode => {
+	// 		disposeVnode(oldVnode);
+	// 	});
+	// 	return newChildren[0];
+	// }
 }
 
 /**
- * 当我们更新组件的时候，并不需要重新创建一个组件，而是拿到久的组件的props,state,context就可以进行重新render
+ * 当我们更新组件的时候，并不需要重新创建一个组件，而是拿到旧的组件的props,state,context就可以进行重新render
  * 而且要注意的是，组件的更新并不需要比对或者交换state,因为组件的更新完全依靠外部的context和props
  * @param {Vnode} oldComponentVnode  老的孩子组件，_instance里面有着这个组件的实例
  * @param {Vnode} newComponentVnode  新的组件
@@ -234,12 +243,12 @@ export function update(oldVnode, newVnode, parentDomNode, parentContext) {
 			}
 
 			//更新后的child，返回给组件
-			// newVnode.props.children = updateChild(
-			// 	oldVnode.props.children,
-			// 	newVnode.props.children,
-			// 	oldVnode._hostNode,
-			// 	parentContext
-			// );
+			newVnode.props.children = updateChild(
+				oldVnode.props.children,
+				newVnode.props.children,
+				oldVnode._hostNode,
+				parentContext
+			);
 		}
 
 		//function   class
