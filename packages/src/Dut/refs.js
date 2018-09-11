@@ -38,3 +38,13 @@ const refStrategy = {
 		}
 	}
 };
+
+export function clearRefs(refs) {
+	if (typeof refs === "function") {
+		refs(null);
+	} else {
+		for (let refName in refs) {
+			refs[refName] = null;
+		}
+	}
+}

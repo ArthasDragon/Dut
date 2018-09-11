@@ -5,6 +5,7 @@ import { setRef } from "./refs";
 import { ComStatus } from "./component";
 import { catchError } from "./ErrorUtil";
 import { currentOwner, DuyRender } from "./render";
+import { disposeVnode } from "./dispose";
 
 /**
  * 获取Vnode对应实例的信息
@@ -44,7 +45,7 @@ export function updateChild(
 	parentDomNode,
 	parentContext
 ) {
-	oldChildren = flattenChildren(oldChildren);
+	oldChildren = oldChildren || [];
 	newChildren = flattenChildren(newChildren); //扁平化newChild
 	//非数组则转为数组
 	if (!Array.isArray(oldChildren)) oldChildren = [oldChildren];
@@ -60,7 +61,6 @@ export function updateChild(
 		oldEndVnode = oldChildren[oldEndIndex],
 		newEndVnode = newChildren[newEndIndex],
 		hascode;
-	console.log(oldChildren, newChildren, parentDomNode);
 
 	//while oldChildren is empty, update every newChildren's item. return updated newChildren
 	if (newLength >= 0 && !oldLength) {
@@ -72,12 +72,22 @@ export function updateChild(
 		return newChildren;
 	}
 
-	// if (!newLength && oldLength >= 0) {
-	// 	oldChildren.forEach(oldVnode => {
-	// 		disposeVnode(oldVnode);
-	// 	});
-	// 	return newChildren[0];
-	// }
+	if (!newLength && oldLength >= 0) {
+		oldChildren.forEach(oldVnode => {
+			disposeVnode(oldVnode);
+		});
+		return newChildren[0];
+	}
+
+	oldChildren.forEach(oldVnode => {
+		disposeVnode(oldVnode);
+	});
+	newChildren.forEach((newVnode, index) => {
+		DuyRender(newVnode, parentDomNode, false, parentContext);
+		//重新赋值更新后的Vnode
+		newChildren[index] = newVnode;
+	});
+	return newChildren;
 }
 
 /**

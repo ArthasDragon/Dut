@@ -1,5 +1,5 @@
 /**
- * by 暗影舞者 Copyright 2018-09-10
+ * by 暗影舞者 Copyright 2018-09-11
  */
 
 var __type = Object.prototype.toString;
@@ -275,6 +275,72 @@ var refStrategy = {
 		}
 	}
 };
+function clearRefs(refs) {
+	if (typeof refs === "function") {
+		refs(null);
+	} else {
+		for (var refName in refs) {
+			refs[refName] = null;
+		}
+	}
+}
+
+function disposeVnode(Vnode) {
+	var type = Vnode.type;
+	if (typeNumber(Vnode) === 7) {
+		disposeChildVnode(Vnode);
+		return;
+	}
+	if (!type) return;
+	if (typeof Vnode.type === "function") {
+		if (Vnode._instance.componentWillUnmount) {
+			catchError(Vnode._instance, "componentWillUnmount", []);
+		}
+		clearRefs(Vnode._instance.ref);
+	}
+	if (Vnode.props.children) {
+		disposeChildVnode(Vnode.props.children);
+	}
+	if (Vnode._PortalHostNode) {
+		var parent = Vnode._PortalHostNode.parentNode;
+		parent.removeChild(Vnode._PortalHostNode);
+	} else {
+		if (Vnode._hostNode) {
+			var _parent = Vnode._hostNode.parentNode;
+			if (_parent) _parent.removeChild(Vnode._hostNode);
+		}
+	}
+	Vnode._hostNode = null;
+}
+function disposeChildVnode(childVnode) {
+	var children = childVnode;
+	if (typeNumber(children) !== 7) children = [children];
+	children.forEach(function(child) {
+		if (typeof child.type === "function") {
+			if (typeNumber(child._hostNode) <= 1) {
+				child._hostNode = null;
+				child._instance = null;
+				return;
+			}
+			if (child._instance.componentWillUnmount) {
+				catchError(child._instance, "componentWillUnmount", []);
+			}
+		}
+		if (
+			typeNumber(child) !== 4 &&
+			typeNumber(child) !== 3 &&
+			child._hostNode !== void 666
+		) {
+			var parent = child._hostNode.parentNode;
+			parent.removeChild(child._hostNode);
+			child._hostNode = null;
+			child._instance = null;
+			if (child.props.children) {
+				disposeChildVnode(child.props.children);
+			}
+		}
+	});
+}
 
 function instanceProps(componentVnode) {
 	return {
@@ -295,7 +361,8 @@ function updateChild() {
 		arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 	var newChildren = arguments[1];
 	var parentDomNode = arguments[2];
-	oldChildren = flattenChildren(oldChildren);
+	var parentContext = arguments[3];
+	oldChildren = oldChildren || [];
 	newChildren = flattenChildren(newChildren);
 	if (!Array.isArray(oldChildren)) oldChildren = [oldChildren];
 	if (!Array.isArray(newChildren)) newChildren = [newChildren];
@@ -307,7 +374,27 @@ function updateChild() {
 		newStartVnode = newChildren[0],
 		oldEndVnode = oldChildren[oldEndIndex],
 		newEndVnode = newChildren[newEndIndex];
-	console.log(oldChildren, newChildren, parentDomNode);
+	if (newLength >= 0 && !oldLength) {
+		newChildren.forEach(function(newVnode, index) {
+			DuyRender(newVnode, parentDomNode, false, parentContext);
+			newChildren[index] = newVnode;
+		});
+		return newChildren;
+	}
+	if (!newLength && oldLength >= 0) {
+		oldChildren.forEach(function(oldVnode) {
+			disposeVnode(oldVnode);
+		});
+		return newChildren[0];
+	}
+	oldChildren.forEach(function(oldVnode) {
+		disposeVnode(oldVnode);
+	});
+	newChildren.forEach(function(newVnode, index) {
+		DuyRender(newVnode, parentDomNode, false, parentContext);
+		newChildren[index] = newVnode;
+	});
+	return newChildren;
 }
 function updateComponent(oldComponentVnode, newComponentVnode, parentContext) {
 	var _instanceProps = instanceProps(oldComponentVnode),
@@ -403,6 +490,7 @@ function update(oldVnode, newVnode, parentDomNode, parentContext) {
 			return newVnode;
 		}
 		if (typeNumber(oldVnode.type) === 4) {
+			console.log(oldVnode, newVnode);
 			updateProps(oldVnode.props, newVnode.props, newVnode._hostNode);
 			if (oldVnode.ref !== newVnode.ref) {
 				setRef(newVnode, oldVnode.owner, newVnode._hostNode);
